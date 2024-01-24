@@ -35,6 +35,8 @@ class MessageFieldConfig {
     this.textStyle,
     this.hintTextStyle,
     this.svgIconSendMessage = defaultSvgIconSendMessage,
+    this.svgIconEmojiSend = defaultSvgIconSendEmoji,
+    this.svgIconAddFile = defaultSvgIconAddFile,
     this.decorationSendMessage = defaultDecorationSendMessage,
     this.sizeSendMessageContainer = defaultSizeSendMessageContainer,
     this.sizeSendMessageIcon = defaultSizeSendMessageIcon,
@@ -58,6 +60,12 @@ class MessageFieldConfig {
 
   /// Svg-код иконки отправки сообщения
   final String svgIconSendMessage;
+
+  /// Svg-код иконки отправки сообщения
+  final String svgIconEmojiSend;
+
+  /// Svg-код иконки отправки сообщения
+  final String svgIconAddFile;
 
   /// BoxDecoration контейнера-кнопки отправки сообщения
   final BoxDecoration decorationSendMessage;

@@ -12,6 +12,8 @@ dependencies:
   flutter_svg: ^2.0.9
   flutter:
     sdk: flutter
+  emoji_picker_flutter: ^1.6.3
+  uuid: ^4.3.3
 
 dev_dependencies:
   flutter_test:

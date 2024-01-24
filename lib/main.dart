@@ -40,6 +40,9 @@ class _MyHomePageState extends State<MyHomePage> {
             child: const Icon(Icons.message),
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => ChatRoomScreen(
+                      token: "token",
+                      phone: "phone",
+                      point: 00000,
                       chatUiConfigurator: uiConfig,
                     )))),
         body: const Center(child: Text('It is a project screen')));

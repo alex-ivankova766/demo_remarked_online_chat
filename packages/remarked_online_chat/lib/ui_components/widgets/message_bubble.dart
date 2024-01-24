@@ -35,7 +35,7 @@ class MessageBubble extends StatelessWidget {
         constraints: BoxConstraints(
             maxWidth: size.width *
                 chatUiConfigurator.chatFieldConfig.relativeMessageBubbleWidth),
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(12.0),
         margin: const EdgeInsets.all(4.0),
         decoration: BoxDecoration(
           color: backgroundColor,

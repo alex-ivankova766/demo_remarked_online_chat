@@ -1,12 +1,15 @@
 class Message {
-  Message(
-      {required this.createdAt,
-      required this.sender,
-      required this.recipient,
-      required this.point,
-      required this.direction,
-      required this.channel,
-      required this.content});
+  Message({
+    required this.createdAt,
+    required this.sender,
+    required this.recipient,
+    required this.point,
+    required this.direction,
+    required this.channel,
+    required this.content,
+    required this.uuid,
+    // this.id
+  });
   final DateTime createdAt;
   final String sender;
   final String recipient;
@@ -14,16 +17,35 @@ class Message {
   final MessageDirection direction;
   final MessageChannel channel;
   final String content;
+  final String uuid;
+  // final int? id;
 
-  factory Message.fromJson(Map<String, dynamic> json) => Message(
-        createdAt: DateTime.parse(json['date']),
-        sender: json['from'] ?? '',
-        recipient: json['to'] ?? '',
-        point: json['point'] ?? '',
-        direction: MessageDirectionExtension.fromJson(json['direction']),
-        channel: MessageChannelExtension.fromJson(json['channel']),
-        content: json['text'] ?? '',
-      );
+  factory Message.fromJson(Map<String, dynamic> json) {
+    try {
+      return Message(
+          createdAt: DateTime.now(),
+          sender: json['from'] ?? '',
+          recipient: json['to'] ?? '',
+          point: json['point'] ?? '',
+          direction: MessageDirectionExtension.fromJson(json['direction']),
+          channel: MessageChannelExtension.fromJson(json['channel']),
+          content: json['text'] ?? '',
+          // id: json['id'] ?? '',
+          uuid: json['message_id']);
+    } catch (e) {
+      print(e);
+      return Message(
+          createdAt: DateTime.now(),
+          sender: json['from'] ?? '',
+          recipient: json['to'] ?? '',
+          point: json['point'] ?? '',
+          direction: MessageDirectionExtension.fromJson(json['direction']),
+          channel: MessageChannelExtension.fromJson(json['channel']),
+          content: json['text'] ?? '',
+          // id: json['id'] ?? '',
+          uuid: json['message_id']);
+    }
+  }
 
   static Map<String, dynamic> toMap(Message message) => {
         "createdAt": message.createdAt,
@@ -33,6 +55,7 @@ class Message {
         "direction": message.direction.toJson(),
         "channel": message.channel.toJson(),
         "content": message.content,
+        "message_id": message.uuid
       };
 }
 
@@ -63,13 +86,15 @@ extension MessageDirectionExtension on MessageDirection {
   }
 }
 
-enum MessageChannel { whatsapp, telegram }
+enum MessageChannel { whatsapp, telegram, onlinechat }
 
 extension MessageChannelExtension on MessageChannel {
   String toJson() {
     switch (this) {
       case MessageChannel.whatsapp:
         return 'whatsapp';
+      case MessageChannel.onlinechat:
+        return 'onlinechat';
       case MessageChannel.telegram:
         return 'telegram';
       default:
@@ -81,6 +106,8 @@ extension MessageChannelExtension on MessageChannel {
     switch (value) {
       case 'whatsapp':
         return MessageChannel.whatsapp;
+      case 'onlinechat':
+        return MessageChannel.onlinechat;
       case 'telegram':
         return MessageChannel.telegram;
       default:
