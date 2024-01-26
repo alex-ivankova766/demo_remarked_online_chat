@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:remarked_online_chat/models/message.dart';
 import 'package:remarked_online_chat/services/api_client.dart';
+import 'package:remarked_online_chat/services/credentials.dart';
 import 'package:remarked_online_chat/ui_components/ui_configurator/ui_configurator.dart';
 import 'package:remarked_online_chat/ui_components/widgets/info_snack_bar.dart';
 import 'package:uuid/uuid.dart';
@@ -15,16 +16,14 @@ import 'widgets/main_block.dart';
 ApiClient apiClient = ApiClient();
 
 class ChatRoomScreen extends StatefulWidget {
-  const ChatRoomScreen(
-      {required this.token,
-      required this.phone,
-      required this.point,
+  ChatRoomScreen(
+      {required this.credentials,
       this.chatUiConfigurator = const ChatUiConfigurator(),
-      super.key});
+      super.key}) {
+    apiClient.credentials = credentials;
+  }
   final ChatUiConfigurator chatUiConfigurator;
-  final String token;
-  final String phone;
-  final int point;
+  final Credentials credentials;
 
   @override
   State<ChatRoomScreen> createState() => _ChatRoomScreenState();
@@ -42,8 +41,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
   @override
   void initState() {
-    timer = Timer.periodic(const Duration(seconds: 5), (Timer t) {
-      _loadMessages();
+    _loadAllMessages().then((_) {
+      timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+        if (_messages.isEmpty) {
+          _loadAllMessages();
+        } else {
+          _loadNewMessages();
+        }
+      });
     });
 
     super.initState();
@@ -68,24 +73,23 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     });
   }
 
-  void _sendMessage() async {
+  Future<void> _sendMessage() async {
     final message = Message(
         createdAt: DateTime.now(),
         content: messageController.text,
         channel: MessageChannel.onlinechat,
         direction: MessageDirection.output,
         recipient: '',
-        sender: widget.phone,
-        point: widget.point,
+        sender: widget.credentials.phone,
+        point: widget.credentials.point,
         uuid: const Uuid().v4());
     setState(() {
       _messages.add(message);
     });
     messageController.clear();
     _scrollToBottom();
-    bool isSendSuccess = await apiClient.sendMessage(
-        message, widget.token, widget.phone, widget.point);
-    if (!isSendSuccess) {
+    message.id = await apiClient.sendMessage(message);
+    if (message.id == null) {
       _showInfo('Сообщение не отправлено');
       setState(() {
         _messages.removeLast();
@@ -106,31 +110,34 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     });
   }
 
-  _loadMessages() async {
+  Future<void> _loadNewMessages() async {
     List<Message> messagesFromApi =
-        await apiClient.fetchMessages(widget.token, widget.phone, widget.point);
+        await apiClient.fetchNewMessages(_messages.last.id);
+    if (messagesFromApi.isEmpty) {
+      return;
+    }
+
+    Set<Message> setMessagesFromApi = Set.from(messagesFromApi);
+    Set<Message> setMessagesOnPhone = Set.from(_messages);
+
+    Set<Message> onlyNewMessages =
+        setMessagesFromApi.difference(setMessagesOnPhone);
+
+    List<Message> onlyNewMessagesList = onlyNewMessages.toList();
+    setState(() {
+      _messages.addAll(onlyNewMessagesList);
+    });
+    _scrollToBottom();
+  }
+
+  Future<void> _loadAllMessages() async {
+    List<Message> messagesFromApi = await apiClient.fetchMessages();
     if (messagesFromApi.isEmpty) {
       return;
     }
     messagesFromApi.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-    if (messagesFromApi.isNotEmpty &&
-        _messages.isNotEmpty &&
-        messagesFromApi.last.uuid == _messages.last.uuid) {
-      return;
-    }
-    int startIndex = (_messages.isNotEmpty)
-        ? messagesFromApi
-                .indexWhere((element) => element.uuid == _messages.last.uuid) +
-            1
-        : -1;
-    List<Message> newMessages;
-    if (startIndex != -1) {
-      newMessages = messagesFromApi.sublist(startIndex);
-    } else {
-      newMessages = messagesFromApi;
-    }
     setState(() {
-      _messages.addAll(newMessages);
+      _messages.addAll(messagesFromApi);
     });
     _scrollToBottom();
   }

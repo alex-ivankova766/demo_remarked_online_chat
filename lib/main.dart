@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remarked_online_chat/services/credentials.dart';
 import 'package:remarked_online_chat/ui_components/screens/chat_screen.dart';
 
 import 'ui_config/ui_config.dart';
@@ -40,9 +41,8 @@ class _MyHomePageState extends State<MyHomePage> {
             child: const Icon(Icons.message),
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => ChatRoomScreen(
-                      token: "token",
-                      phone: "phone",
-                      point: 00000,
+                      credentials: const Credentials(
+                          token: "token", phone: "phone", point: 00000),
                       chatUiConfigurator: uiConfig,
                     )))),
         body: const Center(child: Text('It is a project screen')));

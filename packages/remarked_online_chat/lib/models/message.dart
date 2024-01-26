@@ -1,15 +1,14 @@
 class Message {
-  Message({
-    required this.createdAt,
-    required this.sender,
-    required this.recipient,
-    required this.point,
-    required this.direction,
-    required this.channel,
-    required this.content,
-    required this.uuid,
-    // this.id
-  });
+  Message(
+      {required this.createdAt,
+      required this.sender,
+      required this.recipient,
+      required this.point,
+      required this.direction,
+      required this.channel,
+      required this.content,
+      required this.uuid,
+      this.id});
   final DateTime createdAt;
   final String sender;
   final String recipient;
@@ -18,34 +17,18 @@ class Message {
   final MessageChannel channel;
   final String content;
   final String uuid;
-  // final int? id;
+  int? id;
 
-  factory Message.fromJson(Map<String, dynamic> json) {
-    try {
-      return Message(
-          createdAt: DateTime.now(),
-          sender: json['from'] ?? '',
-          recipient: json['to'] ?? '',
-          point: json['point'] ?? '',
-          direction: MessageDirectionExtension.fromJson(json['direction']),
-          channel: MessageChannelExtension.fromJson(json['channel']),
-          content: json['text'] ?? '',
-          // id: json['id'] ?? '',
-          uuid: json['message_id']);
-    } catch (e) {
-      print(e);
-      return Message(
-          createdAt: DateTime.now(),
-          sender: json['from'] ?? '',
-          recipient: json['to'] ?? '',
-          point: json['point'] ?? '',
-          direction: MessageDirectionExtension.fromJson(json['direction']),
-          channel: MessageChannelExtension.fromJson(json['channel']),
-          content: json['text'] ?? '',
-          // id: json['id'] ?? '',
-          uuid: json['message_id']);
-    }
-  }
+  factory Message.fromJson(Map<String, dynamic> json) => Message(
+      createdAt: DateTime.now(),
+      sender: json['from'] ?? '',
+      recipient: json['to'] ?? '',
+      point: json['point'] ?? '',
+      direction: MessageDirectionExtension.fromJson(json['direction']),
+      channel: MessageChannelExtension.fromJson(json['channel']),
+      content: json['text'] ?? '',
+      id: json['id'],
+      uuid: json['message_id']);
 
   static Map<String, dynamic> toMap(Message message) => {
         "createdAt": message.createdAt,
@@ -57,6 +40,16 @@ class Message {
         "content": message.content,
         "message_id": message.uuid
       };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Message &&
+          runtimeType == other.runtimeType &&
+          uuid == other.uuid;
+
+  @override
+  int get hashCode => uuid.hashCode;
 }
 
 ///!!!на сервере in - от поль-ля к рекмаркед, на клиенте наоборот!!!
